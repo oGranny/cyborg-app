@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "984915505078",
+    "project_id": "cyborg-app-flutter",
+    "storage_bucket": "cyborg-app-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:984915505078:android:fb2cdd93a361a5b0775b17",
+        "android_client_info": {
+          "package_name": "com.cyborgnitrkl.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq4lP26tbiyqqLx8uPtu6_qCXEUsazUrY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
