@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cyborg/pages/main_page.dart';
 import 'package:cyborg/pages/signup_page.dart';
@@ -26,7 +24,6 @@ class _LoginPageState extends State<LoginPage> {
   void login(BuildContext context) async {
     String rollno = rollNumberController.text.trim();
     String password = passwordController.text.trim();
-    bool verified = false;
 
     setState(() {
       isLoading = true;
@@ -38,25 +35,30 @@ class _LoginPageState extends State<LoginPage> {
         email: "$rollno@nitrkl.ac.in",
         password: password,
       );
+      
       User? user = userCredential.user;
 
-      await _firestore.collection('users').doc(user?.uid).get().then((value) {
-        if (value.exists) {
-          verified = value.data()!['verified'];
-          if (value.data()!['verified'] == false) {
-            showMessage("You are not verified yet.");
-            _auth.signOut();
-          } else {
-            showMessage("Login successful");
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MainPage()),
-            );
-          }
-        }
-      });
+      if (user != null) {
+        // Reload the user to get the latest verification status
+        await user.reload();
+        user = _auth.currentUser;
 
-      // Check if email is verified
+        if (user!.emailVerified) {
+          // If email is verified, update Firestore
+          await _firestore.collection('users').doc(user.uid).update({
+            'verified': true,
+          });
+
+          showMessage("Login successful.");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainPage()),
+          );
+        } else {
+          showMessage("Please verify your email before logging in.");
+          await _auth.signOut();
+        }
+      }
     } on FirebaseAuthException catch (e) {
       showMessage("Error: ${e.message}");
     } finally {
@@ -147,25 +149,24 @@ class _LoginPageState extends State<LoginPage> {
                       },
                   ),
                 ])),
+
                 const SizedBox(height: 30.0),
 
                 // Login Button
                 isLoading
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : ElevatedButton(
                         onPressed: () => login(context),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 80.0, vertical: 15.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Login',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                          ),
+                          style: TextStyle(fontSize: 18.0),
                         ),
                       ),
               ],

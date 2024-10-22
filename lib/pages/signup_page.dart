@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cyborg/pages/login_page.dart';
-import 'package:cyborg/pages/main_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -26,10 +25,10 @@ class _SignUpPageState extends State<SignUpPage> {
     String rollNumber = rollNumberController.text.trim();
     String password = passwordController.text.trim();
     String confirmPassword = confirmPasswordController.text.trim();
-    bool verified = false;
 
     if (password != confirmPassword) {
       showMessage("Passwords do not match!");
+      return false;
     }
 
     setState(() {
@@ -37,27 +36,28 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     try {
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+      // Create user with Firebase Authentication
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: "$rollNumber@nitrkl.ac.in",
         password: password,
       );
 
       User? user = userCredential.user;
 
-      if (user != null && !user.emailVerified) {
-        await user.sendEmailVerification();
-        await _firestore.collection('users').doc(userCredential.user?.uid).set({
+      if (user != null) {
+        // Store user information in Firestore with verified: false initially
+        await _firestore.collection('users').doc(user.uid).set({
           'rollNumber': rollNumber,
-          'uid': userCredential.user?.uid,
-          'verified': verified,
+          'uid': user.uid,
+          'verified': false, // Initially not verified
           'signupTime': DateTime.now().millisecondsSinceEpoch,
         });
 
-        showMessage("You will soon be verified");
+        // Send email verification
+        await user.sendEmailVerification();
+
+        showMessage("Verification email sent. Please verify your account.");
         await _auth.signOut();
-      } else {
-        showMessage("Please login from login page.");
       }
 
       return true;
@@ -158,7 +158,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                               builder: (context) => const LoginPage()),
@@ -195,3 +195,4 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 }
+
