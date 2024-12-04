@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cyborg/pages/main_page.dart';
-import 'package:cyborg/pages/signup_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'admin_page.dart';
+import 'main_page.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,7 +21,6 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
 
-  // Function to log in using Firebase Authentication
   void login(BuildContext context) async {
     String rollno = rollNumberController.text.trim();
     String password = passwordController.text.trim();
@@ -30,30 +30,51 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      // Sign in with email and password
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: "$rollno@nitrkl.ac.in",
         password: password,
       );
-      
-      User? user = userCredential.user;
 
+      User? user = userCredential.user;
       if (user != null) {
-        // Reload the user to get the latest verification status
         await user.reload();
         user = _auth.currentUser;
 
         if (user!.emailVerified) {
-          // If email is verified, update Firestore
-          await _firestore.collection('users').doc(user.uid).update({
-            'verified': true,
-          });
+          DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
 
-          showMessage("Login successful.");
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MainPage()),
-          );
+          if (userDoc.exists) {
+            String role = userDoc['role'];
+            bool verified = userDoc['verified'];
+            String requestStatus = userDoc['requestStatus'];
+
+
+            if (role == 'secretary' || role == 'president' || role == 'vice president' || role == 'lead' ) {
+              if (verified) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AdminPage()),
+                );
+              } else {
+                showMessage("Account not verified. Contact the admin.");
+              }
+            } else if (role == 'member') {
+              if (!verified) {
+                showMessage("Request pending. Contact admin to accept your request.");
+              } else if (requestStatus == 'accepted') {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MainPage()),
+                );
+              } else {
+                showMessage("Request not yet accepted. Contact the admin.");
+              }
+            } else {
+              showMessage("Unauthorized role.");
+            }
+          } else {
+            showMessage("User data not found.");
+          }
         } else {
           showMessage("Please verify your email before logging in.");
           await _auth.signOut();
@@ -68,109 +89,65 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // Function to display messages
   void showMessage(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Scaffold(
-        backgroundColor: Colors.blueAccent,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Logo or App Name
-                Text(
-                  'Login',
-                  style: TextStyle(
-                    fontSize: 32.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+    return Scaffold(
+      backgroundColor: Colors.blueAccent,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Login',
+                style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              const SizedBox(height: 40.0),
+              TextField(
+                controller: rollNumberController,
+                decoration: InputDecoration(
+                  hintText: 'Enter Roll Number',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide.none),
                 ),
-                SizedBox(height: 40.0),
-
-                // Roll Number Field
-                TextField(
-                  controller: rollNumberController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter Roll Number',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  keyboardType: TextInputType.text,
+                keyboardType: TextInputType.text,
+              ),
+              const SizedBox(height: 20.0),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(
+                  hintText: 'Enter Password',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide.none),
                 ),
-                SizedBox(height: 20.0),
-
-                // Password Field
-                TextField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    hintText: 'Enter Password',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  obscureText: true,
-                ),
-
-                const SizedBox(height: 30.0),
-
-                RichText(
-                    text: TextSpan(children: [
-                  const TextSpan(text: 'Don\'t have an account? '),
-                  TextSpan(
-                    text: 'Sign up',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SignUpPage()),
-                        );
-                      },
-                  ),
-                ])),
-
-                const SizedBox(height: 30.0),
-
-                // Login Button
-                isLoading
-                    ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        onPressed: () => login(context),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 80.0, vertical: 15.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(fontSize: 18.0),
-                        ),
+                obscureText: true,
+              ),
+              const SizedBox(height: 30.0),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  SignUpPage()));
+                },
+                child: const Text('Sign Up', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 30.0),
+              isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: () => login(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                       ),
-              ],
-            ),
+                      child: const Text('Login', style: TextStyle(fontSize: 18.0)),
+                    ),
+            ],
           ),
         ),
       ),
