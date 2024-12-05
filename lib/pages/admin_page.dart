@@ -10,10 +10,12 @@ class AdminPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Page'),
+        title: const Text('Admin Dashboard'),
+        backgroundColor: Colors.deepPurpleAccent,
+        elevation: 10,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, size: 30),
             onPressed: () async {
               // Log out the user
               await FirebaseAuth.instance.signOut();
@@ -39,73 +41,101 @@ class AdminPage extends StatelessWidget {
           List<DocumentSnapshot> requests = snapshot.data!.docs;
 
           return ListView.builder(
+            padding: const EdgeInsets.all(10),
             itemCount: requests.length,
             itemBuilder: (context, index) {
               var request = requests[index];
-              return ListTile(
-                title: Text(request['name']),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Subsystem: ${request['subsystem']}'),
-                    Text('Role: ${request['role']}'),
-                    Text('Year: ${request['year']}'),
-                  ],
+              return Card(
+                elevation: 5,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.check),
-                      onPressed: () async {
-                        try {
-                          // Move request data to the 'users' collection
-                          await _firestore.collection('users').doc(request.id).set({
-                            'name': request['name'],
-                            'subsystem': request['subsystem'],
-                            'role': request['role'],
-                            'year': request['year'],
-                            'isVerified': true,
-                            'requestStatus':'accepted' // Example: add fields as needed
-                          });
-
-                          // Remove the request from the 'requests' collection
-                          await _firestore.collection('requests').doc(request.id).delete();
-
-                          // Show success message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Request accepted successfully!')),
-                          );
-                        } catch (e) {
-                          // Show error message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: ${e.toString()}')),
-                          );
-                        }
-                      },
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(15),
+                  title: Text(
+                    request['name'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () async {
-                        try {
-                          // Update request status to 'rejected'
-                          await _firestore.collection('requests').doc(request.id).update({
-                            'requestStatus': 'rejected',
-                          });
-
-                          // Show success message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Request rejected!')),
-                          );
-                        } catch (e) {
-                          // Show error message
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: ${e.toString()}')),
-                          );
-                        }
-                      },
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Subsystem: ${request['subsystem']}'),
+                        Text('Role: ${request['role']}'),
+                        Text('Year: ${request['year']}'),
+                      ],
                     ),
-                  ],
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.check,
+                          color: Colors.green,
+                          size: 30,
+                        ),
+                        onPressed: () async {
+                          try {
+                            // Move request data to the 'users' collection
+                            await _firestore.collection('users').doc(request.id).set({
+                              'name': request['name'],
+                              'subsystem': request['subsystem'],
+                              'role': request['role'],
+                              'year': request['year'],
+                              'phno': request['phone'],
+                              'isVerified': true,
+                              'requestStatus': 'accepted',
+                            });
+
+                            // Remove the request from the 'requests' collection
+                            await _firestore.collection('requests').doc(request.id).delete();
+
+                            // Show success message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Request accepted successfully!')),
+                            );
+                          } catch (e) {
+                            // Show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${e.toString()}')),
+                            );
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                          size: 30,
+                        ),
+                        onPressed: () async {
+                          try {
+                            // Update request status to 'rejected'
+                            await _firestore.collection('requests').doc(request.id).update({
+                              'requestStatus': 'rejected',
+                            });
+
+                            // Show success message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Request rejected!')),
+                            );
+                          } catch (e) {
+                            // Show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: ${e.toString()}')),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               );
             },

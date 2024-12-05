@@ -45,12 +45,12 @@ class _LoginPageState extends State<LoginPage> {
 
           if (userDoc.exists) {
             String role = userDoc['role'];
-            bool verified = userDoc['verified'];
+            bool isVerified = userDoc['isVerified'];
             String requestStatus = userDoc['requestStatus'];
 
 
             if (role == 'secretary' || role == 'president' || role == 'vice president' || role == 'lead' ) {
-              if (verified) {
+              if (isVerified) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => AdminPage()),
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                 showMessage("Account not verified. Contact the admin.");
               }
             } else if (role == 'member') {
-              if (!verified) {
+              if (!isVerified) {
                 showMessage("Request pending. Contact admin to accept your request.");
               } else if (requestStatus == 'accepted') {
                 Navigator.pushReplacement(
