@@ -1,7 +1,4 @@
-// ignore_for_file: use_key_in_widget_constructors, prefer_const_constructors
-
 import 'package:cyborg/pages/login_page.dart';
-import 'package:cyborg/pages/signup_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -16,7 +13,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SignUpPage(),
+      home: LoginPage(),
     );
   }
 }
+
