@@ -85,6 +85,7 @@ class AdminPage extends StatelessWidget {
                             // Move request data to the 'users' collection
                             await _firestore.collection('users').doc(request.id).set({
                               'name': request['name'],
+                              'rollno':request['rollNumber'],
                               'subsystem': request['subsystem'],
                               'role': request['role'],
                               'year': request['year'],

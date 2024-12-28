@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             String requestStatus = userDoc['requestStatus'];
 
 
-            if (role == 'secretary' || role == 'president' || role == 'vice president' || role == 'lead' ) {
+            if (role.toLowerCase() == 'secretary' || role.toLowerCase() == 'president' || role.toLowerCase() == 'vice president' || role.toLowerCase() == 'lead' ) {
               if (isVerified) {
                 Navigator.pushReplacement(
                   context,
@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
               } else {
                 showMessage("Account not verified. Contact the admin.");
               }
-            } else if (role == 'member') {
+            } else if (role.toLowerCase() == 'member') {
               if (!isVerified) {
                 showMessage("Request pending. Contact admin to accept your request.");
               } else if (requestStatus == 'accepted') {
