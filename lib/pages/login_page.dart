@@ -48,32 +48,31 @@ class _LoginPageState extends State<LoginPage> {
             bool isVerified = userDoc['isVerified'];
             String requestStatus = userDoc['requestStatus'];
 
-
-            if (role.toLowerCase() == 'secretary' || role.toLowerCase() == 'president' || role.toLowerCase() == 'vice president' || role.toLowerCase() == 'lead' ) {
+            if (role == 'secretary' || role == 'president' || role == 'vice president' || role == 'lead') {
               if (isVerified) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => AdminPage()),
                 );
               } else {
-                showMessage("Account not verified. Contact the admin.");
+                showMessage("Your account is not verified. Please contact the admin.");
               }
-            } else if (role.toLowerCase() == 'member') {
+            } else if (role == 'member') {
               if (!isVerified) {
-                showMessage("Request pending. Contact admin to accept your request.");
+                showMessage("Your request is pending. Contact the admin for approval.");
               } else if (requestStatus == 'accepted') {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => MainPage()),
                 );
               } else {
-                showMessage("Request not yet accepted. Contact the admin.");
+                showMessage("Your request has not been accepted yet. Contact the admin.");
               }
             } else {
-              showMessage("Unauthorized role.");
+              showMessage("Unauthorized role detected. Please contact support.");
             }
           } else {
-            showMessage("User data not found.");
+            showMessage("User data not found in the system.");
           }
         } else {
           showMessage("Please verify your email before logging in.");
@@ -100,55 +99,106 @@ class _LoginPageState extends State<LoginPage> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Login',
-                style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-              const SizedBox(height: 40.0),
-              TextField(
-                controller: rollNumberController,
-                decoration: InputDecoration(
-                  hintText: 'Enter Roll Number',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide.none),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Login',
+                  style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 20.0),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(
-                  hintText: 'Enter Password',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide.none),
+                const SizedBox(height: 40.0),
+                TextField(
+                  controller: rollNumberController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Roll Number',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  keyboardType: TextInputType.text,
                 ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 30.0),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) =>  SignUpPage()));
-                },
-                child: const Text('Sign Up', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(height: 30.0),
-              isLoading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: () => login(context),
+                const SizedBox(height: 20.0),
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter Password',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  obscureText: true,
+                ),
+                const SizedBox(height: 30.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const SignUpPage()),
+                        );
+                      },
+                      child: const Text(
+                        'Sign Up',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: isLoading ? null : () => login(context),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 80.0, vertical: 15.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 15.0),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
                       ),
-                      child: const Text('Login', style: TextStyle(fontSize: 18.0)),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20.0,
+                              width: 20.0,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.0),
+                            )
+                          : const Text('Login', style: TextStyle(fontSize: 18.0)),
                     ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class MainPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Main Page'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              // Navigate back to the login page
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: const Center(
+        child: Text(
+          'Welcome to the Main Page!',
+          style: TextStyle(fontSize: 24),
         ),
       ),
     );
