@@ -1,3 +1,4 @@
+import 'package:cyborg/pages/keys_app.dart';
 import 'package:cyborg/pages/signup_page.dart';
 import 'package:cyborg/widgets/drawer.dart';
 import 'package:cyborg/widgets/navbar.dart';
@@ -38,39 +39,112 @@ class HomePage extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
-        child: StaggeredGrid.count(
-          crossAxisCount: 4,
-          mainAxisSpacing: 3,
-          crossAxisSpacing: 4,
-          children: const [
-            StaggeredGridTile.count(
-              crossAxisCellCount: 2,
-              mainAxisCellCount: 3,
-              child: Tile(index: 0),
-            ),
-            StaggeredGridTile.count(
-              crossAxisCellCount: 2,
-              mainAxisCellCount: 1,
-              child: Tile(index: 1),
-            ),
-            StaggeredGridTile.count(
-              crossAxisCellCount: 2,
-              mainAxisCellCount: 2,
-              child: Tile(index: 2),
-            ),
-            // StaggeredGridTile.count(
-            //   crossAxisCellCount: 1,
-            //   mainAxisCellCount: 1,
-            //   child: Tile(index: 3),
-            // ),
-            // StaggeredGridTile.count(
-            //   crossAxisCellCount: 4,
-            //   mainAxisCellCount: 2,
-            //   child: Tile(index: 4),
-            // ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const GridWidgets(),
+              const SizedBox(height: 20),
+              Text("Activities",
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+              ListTile(
+                leading: Icon(Icons.ac_unit),
+                title: Text('Tile '),
+                onTap: () {
+                  print('Tile clicked');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.ac_unit),
+                title: Text('Tile '),
+                onTap: () {
+                  print('Tile clicked');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.ac_unit),
+                title: Text('Tile '),
+                onTap: () {
+                  print('Tile clicked');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.ac_unit),
+                title: Text('Tile '),
+                onTap: () {
+                  print('Tile clicked');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.ac_unit),
+                title: Text('Tile '),
+                onTap: () {
+                  print('Tile clicked');
+                },
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class GridWidgets extends StatelessWidget {
+  const GridWidgets({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return StaggeredGrid.count(
+      crossAxisCount: 4,
+      mainAxisSpacing: 3,
+      crossAxisSpacing: 4,
+      children: [
+        StaggeredGridTile.count(
+          crossAxisCellCount: 2,
+          mainAxisCellCount: 3,
+          child: TileCustom(
+            onClick: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => KeysPage()));
+            },
+            icon: Icons.vpn_key_outlined,
+            title: "Keys",
+            index: 0,
+          ),
+        ),
+        StaggeredGridTile.count(
+          crossAxisCellCount: 2,
+          mainAxisCellCount: 1,
+          child: TileCustomSmall(
+              onClick: () {},
+              icon: Icons.calendar_month_rounded,
+              title: "Calender",
+              index: 1),
+        ),
+        StaggeredGridTile.count(
+          crossAxisCellCount: 2,
+          mainAxisCellCount: 2,
+          child: TileCustom(
+              icon: Icons.assignment_outlined,
+              onClick: () {},
+              title: "Projects",
+              index: 2),
+        ),
+        // StaggeredGridTile.count(
+        //   crossAxisCellCount: 1,
+        //   mainAxisCellCount: 1,
+        //   child: Tile(index: 3),
+        // ),
+        // StaggeredGridTile.count(
+        //   crossAxisCellCount: 4,
+        //   mainAxisCellCount: 2,
+        //   child: Tile(index: 4),
+        // ),
+      ],
     );
   }
 }
@@ -92,7 +166,15 @@ class Tile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final child = Container(
-      color: Colors.primaries[index % Colors.primaries.length],
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+            bottomLeft: Radius.circular(10),
+            bottomRight: Radius.circular(10)),
+        color: Colors.primaries[index % Colors.primaries.length],
+        // color: backgroundColor,
+      ),
       height: extent,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -125,28 +207,30 @@ class Tile extends StatelessWidget {
   }
 }
 
-class Tile_custom extends StatelessWidget {
+class TileCustom extends StatelessWidget {
   final void Function()? onClick;
   final IconData icon;
+  final int index;
   final String title;
-  const Tile_custom({
+  const TileCustom({
     super.key,
     this.onClick,
     required this.icon,
     required this.title,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 135,
-      width: 135,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-      ),
-      child: GestureDetector(
-        onTap: onClick,
+    return GestureDetector(
+      onTap: onClick,
+      child: Container(
+        height: 135,
+        width: 135,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.primaries[index % Colors.primaries.length],
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -156,7 +240,51 @@ class Tile_custom extends StatelessWidget {
               Icon(
                 icon,
                 // color: Colors.black,
-                size: 30,
+                size: 40,
+              ),
+              Text(title, style: TextStyle(fontSize: 25)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TileCustomSmall extends StatelessWidget {
+  final void Function()? onClick;
+  final IconData icon;
+  final int index;
+  final String title;
+  const TileCustomSmall({
+    super.key,
+    this.onClick,
+    required this.icon,
+    required this.title,
+    required this.index,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onClick,
+      child: Container(
+        // height: 135,
+        // width: 135,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.primaries[index % Colors.primaries.length],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                // color: Colors.black,
+                size: 40,
               ),
               Text(title, style: TextStyle(fontSize: 25)),
             ],
