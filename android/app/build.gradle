@@ -6,8 +6,9 @@ plugins {
 }
 
 android {
+    compileSdk = 34
     namespace = "com.cyborgnitrkl.app"
-    compileSdk = flutter.compileSdkVersion
+    // compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
